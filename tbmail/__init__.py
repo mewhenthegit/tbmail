@@ -9,7 +9,7 @@ import contextlib, threading, time, math, uvicorn
 bot = Bot('TBMail (?)', 'lime', '?', False)
 db = Database()
 
-helpmsg = '''TBMail Resurrected alpha
+helpmsg = '''TBMail Resurrected Beta
 This is NOT the official tbmail, but instead a remake by mewhenthe.
 I promise not to do any funny stuff
 

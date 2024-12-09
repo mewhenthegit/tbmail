@@ -15,19 +15,32 @@ This is NOT the official tbmail, but instead a remake by mewhenthe.
 I promise not to do any funny stuff
 
 ?help - Shows this message, <required> [optional]
+?about - Obtain additional information.
 ?register <address@tbmail> - Registers a new account
 ?send <recipient> <message...> - Send mail to somebody
 ?togglewelcome - Toggles welcome message
 ?inbox [page] - Read inbox\n?view <index> - Lets you read a mail
 ?link <code> - Link your tbmail to an external password, this is recommended
+?recover <code> - Recover your tbmail account, your account must be linked to do this
 
 --- WIP ---
-?recover <code> - Recover your tbmail account, your account must be linked to do this
+There is no dashboard on the website.
 -----------'''
 
 welcomemsg = '''Welcome back, &user.
 You have &count unread mail&edgecase.
 You can disable this welcome message with ?togglewelcome.
+'''
+
+aboutmsg = '''This bot is a recreation/resurrection of TBMail.
+TBMail was, on the surface, a normal mail service designed for trollbox.
+However, the creator of TBMail exploited the popularity of TBMail to spread malware.
+This remake is unofficial and therefor will attempt to avoid such behaviour.
+
+Front-end website used for linking and recovery: http://tbmail.codersquack.nl
+Github repository: https://github.com/mewhenthegit/tbmail
+
+made by mewhenthe
 '''
 
 @bot.event("ready")
@@ -50,6 +63,35 @@ def unknown_command(ctx, cmd):
 @bot.command()
 def help(ctx):
     bot.send(helpmsg)
+
+@bot.command()
+def about(ctx):
+    bot.send(aboutmsg)
+
+@bot.command()
+def recover(ctx, code):
+    db.load()
+    
+    if not code in db.data["recovercodes"].keys():
+        bot.send("Invalid recovery code!")
+        return
+
+    address = db.data["recovercodes"][code]
+    del db.data["recovercodes"][code]
+    db.write()
+
+    user = User.search(db, home=ctx.user.home)
+    if user:
+         bot.send("You already have an account!")
+         return
+    
+    user = User.search(db, username=address)
+    user.home = ctx.user.home
+    idx, user = user.serialize()
+    db.data["users"][idx] = user
+    db.write()
+
+    bot.send("Account recovered succesfully!")
 
 @bot.command()
 def link(ctx, code):
@@ -115,20 +157,23 @@ def inbox(ctx, page=1):
         bot.send("You're not registered!")
         return
     
-    inboxmsg = f"========{ctx.user.nick}'s inbox\n\n"
+    inboxmsg = f"================{ctx.user.nick}'s inbox================\n\n"
     mails = Mail.search(db, receiver = user.username)
     pagecount = math.ceil(len(mails) /5)
-    if page > pagecount:
+
+    if page > pagecount and pagecount > 0:
         bot.send("That page does not exist!")
         return
     
     digestion = 5 if page < pagecount else len(mails) - (page -1) * 5
 
-    for i in range((page-1)*5, (page-1)*5+digestion):
-        mail = mails[i]
-        truncate = mail.body[0:12]+"..." if len(mail.body)>15 else mail.body
-        inboxmsg += f"[{i}]{' *NEW*' if not mail.read else ''} {mail.sender}: {truncate}\n"
+    if pagecount > 0: # lazy and it sucks but who cares
+        for i in range((page-1)*5, (page-1)*5+digestion):
+            mail = mails[i]
+            truncate = mail.body[0:12]+"..." if len(mail.body)>15 else mail.body
+            inboxmsg += f"[{i}]{' *NEW*' if not mail.read else ''} {mail.sender}: {truncate}\n"
 
+    if pagecount == 0: pagecount = 1
     inboxmsg += f"\npage {page}/{pagecount}\nUse ?view <index> to view an email in full"
     bot.send(inboxmsg)
 
@@ -181,6 +226,7 @@ def register(ctx, address):
     bot.send('Registered!')
 
  
+# VOODOO SHIT ALERT!
 def register_error(ctx, error):
     bot.send('You have supplied an incorrect amount of arguments!')
     print(error, str(error))
@@ -191,6 +237,8 @@ bot.error('togglewelcome')(register_error)
 bot.error('inbox')(register_error)
 bot.error('view')(register_error)
 bot.error('link')(register_error)
+bot.error('recover')(register_error)
+bot.error('about')(register_error)
 
 class Server(uvicorn.Server):
 	def install_signal_handlers(self):

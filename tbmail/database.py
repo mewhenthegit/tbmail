@@ -14,7 +14,7 @@ class Database:
     def load(self):
         if not DATABASE.is_file():
             with open(DATABASE, "w+") as f:
-                self.data = {"users": [], "mails": [], "linkcodes": {}}
+                self.data = {"users": [], "mails": [], "linkcodes": {}, "recovercodes": {}}
                 f.write(json.dumps(self.data))
         
         else:

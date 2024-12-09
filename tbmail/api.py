@@ -15,9 +15,36 @@ app = FastAPI()
 @app.get("/", response_class=HTMLResponse)
 def root():
     # print("root!!")
-    with open("static/index.html") as f:
+    with open(STATIC / "index.html") as f:
         return f.read()
-    
+
+@app.post('/api/recover/submit')
+async def submit(request: Request):
+    try:
+        body = await request.json()
+        code = str(random.randint(100000, 999999))
+
+        user = User.search(db, username=body["address"])
+        if not user:
+            return {"success": False, "error": "The credentials do not match!"}
+        
+        if not user.password:
+            return {"success": False, "error": "The credentials do not match!"}
+        
+        if not bcrypt.checkpw(body["password"].encode('utf-8'), user.password.encode('utf-8')):
+            return {"success": False, "error": "The credentials do not match!"}
+
+        # queue[code] = bcrypt.hashpw(body["password"].encode('utf-8'), bcrypt.gensalt(14))
+        db.load()
+        db.data["recovercodes"][str(code)] = user.username
+        db.write()
+
+        return {"success": True, "code": code}
+    except json.decoder.JSONDecodeError:
+        return {"success": False, "error": "No JSON provided!"}
+    except KeyError as e:
+        return {"success": False, "error": f"Missing {e} field."}
+
 @app.post('/api/link/submit')
 async def submit(request: Request):
     try:

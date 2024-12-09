@@ -4,7 +4,7 @@ document.getElementById("link").addEventListener("click", async (ev)=>{
         return;
     }
 
-    let resp = await fetch("http://127.0.0.1:8000/api/recover/submit", {
+    let resp = await fetch("http://tbmail.codersquack.nl/api/recover/submit", {
         method: "POST",
         body: JSON.stringify({
             "address": document.getElementById("address").value,

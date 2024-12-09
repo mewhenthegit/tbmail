@@ -37,8 +37,8 @@ TBMail was, on the surface, a normal mail service designed for trollbox.
 However, the creator of TBMail exploited the popularity of TBMail to spread malware.
 This remake is unofficial and therefor will attempt to avoid such behaviour.
 
-Front-end website used for linking and recovery: http://tbmail.codersquack.nl
-Github repository: https://github.com/mewhenthegit/tbmail
+Front-end website used for linking and recovery: http://tbmail.codersquack.nl 
+Github repository: https://github.com/mewhenthegit/tbmail 
 
 made by mewhenthe
 '''

@@ -9,8 +9,7 @@ import contextlib, threading, time, math, uvicorn
 bot = Bot('TBMail (?)', 'lime', '?', False)
 db = Database()
 
-helpmsg = '''
-TBMail Resurrected alpha
+helpmsg = '''TBMail Resurrected alpha
 This is NOT the official tbmail, but instead a remake by mewhenthe.
 I promise not to do any funny stuff
 
@@ -19,7 +18,8 @@ I promise not to do any funny stuff
 ?register <address@tbmail> - Registers a new account
 ?send <recipient> <message...> - Send mail to somebody
 ?togglewelcome - Toggles welcome message
-?inbox [page] - Read inbox\n?view <index> - Lets you read a mail
+?inbox [page] - Read inbox
+?view <index> - Lets you read a mail
 ?link <code> - Link your tbmail to an external password, this is recommended
 ?recover <code> - Recover your tbmail account, your account must be linked to do this
 
@@ -261,6 +261,6 @@ class Server(uvicorn.Server):
 
 def run():
     bot.connect(blocking=False)
-    uvicorn.run("tbmail.api:app", host='0.0.0.0', reload=True)
+    uvicorn.run("tbmail.api:app", host='0.0.0.0', port=5004, reload=True)
     # with server.run_in_thread():
     #     bot.connect()
